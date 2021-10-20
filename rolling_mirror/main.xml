@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<!-- 
+  Author JamMaster
+-->
+
+<root>
+	<script name="_ActionAttackOverride" file="campaign/scripts/manager_action_attack_override.lua" />
+</root>

@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<root version="3.0">
+
+	<!-- Attributes -->
+	<properties>
+		<name>Rolling Mirror</name>
+		<version>1.0.0</version>
+		<description>
+			<text>This plugin automatically handles all the rolling for the spell Mirror Image</text>
+			<author>JamMaster</author>
+		</description>
+		<loadorder>50</loadorder>
+		<ruleset>
+			<name>5E</name>
+		</ruleset>
+
+		</properties>
+
+	<announcement text="5E Extension - Rolling Mirror v1.0 by JamMaster" font="emotefont"/>
+
+	<base>
+		<includefile source="main.xml" />
+	</base>
+</root>
+
+
