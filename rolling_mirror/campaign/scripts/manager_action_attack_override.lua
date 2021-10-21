@@ -260,7 +260,7 @@ end
 -- Based on EffectManager.hasEffect, but that function is trash
 function getNumMirrorImages(rActor)
 	if not rActor then
-		return false;
+		return 0;
 	end
 	
 	-- Iterate through each effect
