@@ -284,13 +284,11 @@ function hasAnyVisionWithinRange(aVisionTypes, nRange, rActor)
 	for _, vision in ipairs(actorVisions) do
 		for _, visionType in ipairs(aVisionTypes) do
 			if vision.name == visionType and vision.distance >= nRange then
-				Debug.console("Has vision within range: ", vision.name);
 				return true;
 			end
 		end
 	end
 
-	Debug.console("No special visions within sight");
 	return false;
 end
 
