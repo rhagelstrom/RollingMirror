@@ -255,7 +255,7 @@ function onAttack(rSource, rTarget, rRoll)
 	if EffectManager5E.hasEffect(rSource, "Blinded", rTarget) then
 		sendChatMessage(rSource, rTarget, "Attacker is blinded and cannot see mirror images");
 		superOnAttack(rSource, rTarget, rRoll);
-	elseif reachDistance ~= -1 and hasAnyVisionWithinRange({ "blindsight", "truesight" }, reachDistance, rSource) then
+	elseif reachDistance ~= -1 and hasAnyVisionWithinRange({ "blindsight", "truesight", "tremorsense" }, reachDistance, rSource) then
 		sendChatMessage(rSource, rTarget, "Attacker can see through the mirror image illusions");
 		superOnAttack(rSource, rTarget, rRoll);
 	elseif numMirrorImages > 0 then
