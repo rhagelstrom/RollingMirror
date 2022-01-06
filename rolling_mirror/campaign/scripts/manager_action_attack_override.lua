@@ -14,7 +14,7 @@ end
 
 function getMirrorImageEffect(numImages)
 	local effect = { type = "effect", sTargeting = "self", nDuration = 1, sUnits = "minute" };
-	effect.sName = "Mirror Image: " .. numImages .. "; (C)"
+	effect.sName = "Mirror Image: " .. numImages
 
 	return effect;
 end
@@ -250,18 +250,19 @@ function onAttack(rSource, rTarget, rRoll)
 
 	local reachDistance = reachDistanceBetween(rSource, rTarget);
 
-	-- TODO: Change forum description that this doesnt work with blindness from light
 	-- TODO: Make sure player can see their mirror roll
-	if EffectManager5E.hasEffect(rSource, "Blinded", rTarget) then
-		sendChatMessage(rSource, rTarget, "Attacker is blinded and cannot see mirror images");
-		superOnAttack(rSource, rTarget, rRoll);
-	elseif reachDistance ~= -1 and hasAnyVisionWithinRange({ "blindsight", "truesight", "tremorsense" }, reachDistance, rSource) then
-		sendChatMessage(rSource, rTarget, "Attacker can see through the mirror image illusions");
-		superOnAttack(rSource, rTarget, rRoll);
-	elseif numMirrorImages > 0 then
-		local originalRoll = { rSource = rSource, rRoll = rRoll };
-		rollMirrorImageCheck(rTarget, originalRoll, numMirrorImages);
-	else 
+	if numMirrorImages > 0 then
+		if EffectManager5E.hasEffect(rSource, "Blinded", rTarget) then
+			sendChatMessage(rSource, rTarget, "Attacker is blinded and cannot see mirror images");
+			superOnAttack(rSource, rTarget, rRoll);
+		elseif reachDistance ~= -1 and hasAnyVisionWithinRange({ "blindsight", "truesight", "tremorsense" }, reachDistance, rSource) then
+			sendChatMessage(rSource, rTarget, "Attacker can see through the mirror image illusions");
+			superOnAttack(rSource, rTarget, rRoll);
+		else
+			local originalRoll = { rSource = rSource, rRoll = rRoll };
+			rollMirrorImageCheck(rTarget, originalRoll, numMirrorImages);
+		end	
+	else
 		superOnAttack(rSource, rTarget, rRoll);
 	end
 end
