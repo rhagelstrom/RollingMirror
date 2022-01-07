@@ -4,7 +4,7 @@
 	<!-- Attributes -->
 	<properties>
 		<name>Rolling Mirror</name>
-		<version>1.0.5</version>
+		<version>1.0.6</version>
 		<description>
 			<text>This plugin automatically handles all the rolling for the spell Mirror Image</text>
 			<author>JamMaster</author>
@@ -16,7 +16,7 @@
 
 		</properties>
 
-	<announcement text="5E Extension - Rolling Mirror v1.0.5 by JamMaster" font="emotefont"/>
+	<announcement text="5E Extension - Rolling Mirror v1.0.6 by JamMaster" font="emotefont"/>
 
 	<base>
 		<includefile source="main.xml" />

@@ -299,11 +299,11 @@ function reachDistanceBetween(rSource, rTarget)
 	end
 	local srcToken, srcImage = getTokenAndImage(rSource);
     local tgtToken, tgtImage = getTokenAndImage(rTarget);
-
+	
 	if srcToken == nil or tgtToken == nil then
 		return -1;
 	end
-
+	
 	if srcImage.getDistanceBetween == nil then
 		return -1; --This function is only available in FGU.
 	end
@@ -318,7 +318,7 @@ function getTokenAndImage(rActor)
 	
 	local token = CombatManager.getTokenFromCT(rActor.sCTNode);
 	local image = ImageManager.getImageControl(token);
-	if image == nil or not image.hasGrid() then
+	if image == nil then
 		return nil, nil;
 	else
 		return token, image;
