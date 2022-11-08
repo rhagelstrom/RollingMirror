@@ -2,12 +2,16 @@ local superOnAttack = {};
 local nextFreeId = 0;
 local originalRolls = {};
 
+OOB_MSGTYPE_MIRRORIMAGE = "mirrorimage"
+
 function onInit()
 	superOnAttack = ActionAttack.onAttack; -- Stash original away
 	ActionAttack.onAttack = onAttack;
 	ActionsManager.registerResultHandler("attack", onAttack);
 	ActionsManager.registerResultHandler("mirrorImage", onMirrorImageHit);
-
+	if  Session.IsHost then
+		OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_MIRRORIMAGE, handleDecrementMirrorImages)
+	end
 	-- Add the effect to the spell
 	DataSpell.parsedata["mirror image"] = { getMirrorImageEffect(3) };
 end
@@ -32,11 +36,30 @@ function onMirrorImageHit(rSource, rTarget, rRoll)
 	if isMirrorImageHit(numMirrorImages, ActionsManager.total(rRoll)) then
 		local hit = onAttackMirrorImage(originalRoll.rSource, rSource, originalRoll.rRoll);
 		if hit then
-			decrementMirrorImages(rSource, numMirrorImages);
+			if  Session.IsHost then
+				decrementMirrorImages(rSource, numMirrorImages);
+			else
+				notifyDecrementMirrorImages(rSource, numMirrorImages);
+			end
 		end
 	else
 		superOnAttack(originalRoll.rSource, rSource, originalRoll.rRoll);
 	end
+end
+
+function notifyDecrementMirrorImages(rActor, currentNumImages)
+	local msgOOB = {}
+	msgOOB.type = OOB_MSGTYPE_MIRRORIMAGE
+	msgOOB.sNodeActor = ActorManager.getCTNode(rActor).getPath()
+	msgOOB.sNumImages = tostring(currentNumImages)
+	Comm.deliverOOBMessage(msgOOB, "")
+end
+
+function handleDecrementMirrorImages(msgOOB)
+	local nodeActor = DB.findNode(msgOOB.sNodeActor)
+	local currentNumImages= tonumber(msgOOB.sNumImages)
+	local rActor = ActorManager.resolveActor(nodeActor)
+	decrementMirrorImages(rActor, currentNumImages)
 end
 
 function decrementMirrorImages(rActor, currentNumImages)
