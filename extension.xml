@@ -4,7 +4,7 @@
 	<!-- Attributes -->
 	<properties>
 		<name>Rolling Mirror</name>
-		<version>1.0.6-rhagelstrom-1</version>
+		<version>1.0.7</version>
 		<description>
 			<text>This plugin automatically handles all the rolling for the spell Mirror Image</text>
 			<author>JamMaster</author>
@@ -22,5 +22,3 @@
 		<includefile source="main.xml" />
 	</base>
 </root>
-
-

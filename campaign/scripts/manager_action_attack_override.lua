@@ -29,7 +29,7 @@ function onMirrorImageHit(rSource, rTarget, rRoll)
 	Comm.deliverChatMessage(rMessage);
 
 	-- Find the original attack roll. Shitty FG code doesnt allow for passing arguments to handlers
-	local originalRoll = originalRolls[rRoll.originalRollId];
+	local originalRoll = originalRolls[tostring(rRoll.originalRollId)];
 	originalRolls[rRoll.originalRollId] = nil;
 
 	local numMirrorImages = math.min(rRoll.numMirrorImages, 20 - 1); -- max checked outside
@@ -75,7 +75,7 @@ end
 function getMirrorImageDefenseValue(rAttacker, rMirroredTarget, rRoll)
 	-- Base calculations
 	local sAttack = rRoll.sDesc;
-	
+
 	local sAttackType = string.match(sAttack, "%[ATTACK.*%((%w+)%)%]");
 	local bOpportunity = string.match(sAttack, "%[OPPORTUNITY%]");
 	local nCover = tonumber(string.match(sAttack, "%[COVER %-(%d)%]")) or 0;
@@ -88,7 +88,7 @@ function getMirrorImageDefenseValue(rAttacker, rMirroredTarget, rRoll)
 	if ActorManager.hasCT(rMirroredTarget) then
 		local nBonusStat = 0;
 		local nBonusSituational = 0;
-		
+
 		local aAttackFilter = {};
 		if sAttackType == "M" then
 			table.insert(aAttackFilter, "melee");
@@ -134,7 +134,7 @@ function getMirrorImageDefenseValue(rAttacker, rMirroredTarget, rRoll)
 			bADV = true;
 			bProne = true;
 		end
-		
+
 		if bProne then
 			if sAttackType == "M" then
 				bADV = true;
@@ -142,7 +142,7 @@ function getMirrorImageDefenseValue(rAttacker, rMirroredTarget, rRoll)
 				bDIS = true;
 			end
 		end
-		
+
 		if nCover < 5 then
 			local aCover = EffectManager5E.getEffectsByType(rMirroredTarget, "SCOVER", aAttackFilter, rAttacker);
 			if #aCover > 0 or EffectManager5E.hasEffect(rMirroredTarget, "SCOVER", rAttacker) then
@@ -154,10 +154,10 @@ function getMirrorImageDefenseValue(rAttacker, rMirroredTarget, rRoll)
 				end
 			end
 		end
-		
+
 		nDefenseEffectMod = nBonusSituational;
 	end
-	
+
 	return nDefense, 0, nDefenseEffectMod, bADV, bDIS;
 end
 
@@ -172,7 +172,7 @@ function onAttackMirrorImage(rSource, rMirroredTarget, rRoll)
 	local rAction = {};
 	rAction.nTotal = ActionsManager.total(rRoll);
 	rAction.aMessages = {};
-	
+
 	local nDefenseVal, nAtkEffectsBonus, nDefEffectsBonus = getMirrorImageDefenseValue(rSource, rMirroredTarget, rRoll);
 	if nAtkEffectsBonus ~= 0 then
 		rAction.nTotal = rAction.nTotal + nAtkEffectsBonus;
@@ -184,13 +184,13 @@ function onAttackMirrorImage(rSource, rMirroredTarget, rRoll)
 		local sFormat = "[" .. Interface.getString("effects_def_tag") .. " %+d]"
 		table.insert(rAction.aMessages, string.format(sFormat, nDefEffectsBonus));
 	end
-	
+
 	local sCritThreshold = string.match(rRoll.sDesc, "%[CRIT (%d+)%]");
 	local nCritThreshold = tonumber(sCritThreshold) or 20;
 	if nCritThreshold < 2 or nCritThreshold > 20 then
 		nCritThreshold = 20;
 	end
-	
+
 	rAction.nFirstDie = 0;
 	if #(rRoll.aDice) > 0 then
 		rAction.nFirstDie = rRoll.aDice[1].result or 0;
@@ -213,18 +213,18 @@ function onAttackMirrorImage(rSource, rMirroredTarget, rRoll)
 			table.insert(rAction.aMessages, "[MISS]");
 		end
 	end
-	
+
 	Comm.deliverChatMessage(rMessage);
-	
+
 	applyAttackAtMirrorImage(rSource, rMirroredTarget, rRoll.bTower, rRoll.sType, rRoll.sDesc, rAction.nTotal, table.concat(rAction.aMessages, " "));
-	
+
 	-- REMOVE TARGET ON MISS OPTION
 	if (rAction.sResult == "miss" or rAction.sResult == "fumble") then
 		if rRoll.bRemoveOnMiss then
 			TargetingManager.removeTarget(ActorManager.getCTNodeName(rSource), ActorManager.getCTNodeName(rMirroredTarget));
 		end
 	end
-	
+
 	-- HANDLE FUMBLE/CRIT HOUSE RULES
 	local sOptionHRFC = OptionsManager.getOption("HRFC");
 	if rAction.sResult == "fumble" and ((sOptionHRFC == "both") or (sOptionHRFC == "fumble")) then
@@ -241,13 +241,13 @@ end
 function applyAttackAtMirrorImage(rSource, rMirroredTarget, bSecret, sAttackType, sDesc, nTotal, sResults)
 	local msgShort = {font = "msgfont"};
 	local msgLong = {font = "msgfont"};
-	
+
 	msgShort.text = "Attack -> [at Mirror Image]";
 	msgLong.text = "Attack [" .. nTotal .. "] -> [at Mirror Image]";
 	if sResults ~= "" then
 		msgLong.text = msgLong.text .. " " .. sResults;
 	end
-	
+
 	msgShort.icon = "roll_attack";
 	if string.match(sResults, "%[CRITICAL HIT%]") then
 		msgLong.icon = "roll_attack_crit";
@@ -258,7 +258,7 @@ function applyAttackAtMirrorImage(rSource, rMirroredTarget, bSecret, sAttackType
 	else
 		msgLong.icon = "roll_attack";
 	end
-		
+
 	ActionsManager.messageResult(bSecret, rSource, rMirroredTarget, msgLong, msgShort);
 end
 
@@ -284,7 +284,7 @@ function onAttack(rSource, rTarget, rRoll)
 		else
 			local originalRoll = { rSource = rSource, rRoll = rRoll };
 			rollMirrorImageCheck(rTarget, originalRoll, numMirrorImages);
-		end	
+		end
 	else
 		superOnAttack(rSource, rTarget, rRoll);
 	end
@@ -292,7 +292,7 @@ end
 
 function sendChatMessage(rSource, rTarget, text)
 	local msg = { font = "msgfont", text = text, icon = "portrait_gm_token" };
-	
+
 	ActionsManager.messageResult(false, rSource, rTarget, msg, msg);
 end
 
@@ -322,11 +322,11 @@ function reachDistanceBetween(rSource, rTarget)
 	end
 	local srcToken, srcImage = getTokenAndImage(rSource);
     local tgtToken, tgtImage = getTokenAndImage(rTarget);
-	
+
 	if srcToken == nil or tgtToken == nil then
 		return -1;
 	end
-	
+
 	if srcImage.getDistanceBetween == nil then
 		return -1; --This function is only available in FGU.
 	end
@@ -338,7 +338,7 @@ function getTokenAndImage(rActor)
 	if rActor == nil then
 		return nil, nil;
 	end
-	
+
 	local token = CombatManager.getTokenFromCT(rActor.sCTNode);
 	local image = ImageManager.getImageControl(token);
 	if image == nil then
@@ -353,7 +353,7 @@ function getNumMirrorImages(rActor)
 	if not rActor then
 		return 0;
 	end
-	
+
 	-- Iterate through each effect
 	local tResults = {};
 	for _, v in pairs(ActorManager.getEffects(rActor)) do
@@ -374,10 +374,10 @@ function getNumMirrorImages(rActor)
 	return 0;
 end
 
-function rollMirrorImageCheck(actor, originalRoll, numImages) 
+function rollMirrorImageCheck(actor, originalRoll, numImages)
 	local rRoll = { sType = "mirrorImage", sDesc = "[MIRROR CHECK]", aDice = { "d20" }, nMod = 0, bTower = false, bSecret = false };
 	rRoll.numMirrorImages = numImages;
-	
+
 	-- Hacky way of passing the roll info to the mirrorImage handler
 	rRoll.originalRollId = nextFreeId;
 	originalRolls[tostring(nextFreeId)] = originalRoll;
@@ -394,7 +394,7 @@ function parseVisions(sVisions)
 			local name, value = string.gmatch(sTrim, "(.*)% ([0-9]+).*")();
 			if name ~= "" and value ~= "" and name:lower() ~= "passive perception" then
 				local vision = { name = name:lower(), distance = tonumber(value) };
-				table.insert(aVisions, vision);		
+				table.insert(aVisions, vision);
 			end
 		end
 	end
