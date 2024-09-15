@@ -33,8 +33,24 @@ function onMirrorImageHit(rSource, rTarget, rRoll)
 	originalRolls[rRoll.originalRollId] = nil;
 
 	local numMirrorImages = math.min(rRoll.numMirrorImages, 20 - 1); -- max checked outside
-	if isMirrorImageHit(numMirrorImages, ActionsManager.total(rRoll)) then
-		local hit = onAttackMirrorImage(originalRoll.rSource, rSource, originalRoll.rRoll);
+	local bMirrorImageHit = false;
+	if OptionsManager.isOption('GAVE', '2024') then
+		for _, nResult in ipairs(rRoll.aDice) do
+			if nResult.value >= 3 then
+				bMirrorImageHit = true;
+				applyAttackAtMirrorImage(originalRoll.rSource, rSource, originalRoll.rRoll.bTower, originalRoll.rRoll.sType,
+					originalRoll.rRoll.sDesc, ActionsManager.total(originalRoll.rRoll),'[HIT]');
+				break;
+			end
+		end
+	else
+		bMirrorImageHit = isMirrorImageHit(numMirrorImages, ActionsManager.total(rRoll));
+	end
+	if bMirrorImageHit then
+		local hit = true;
+		if not OptionsManager.isOption('GAVE', '2024') then
+			hit = onAttackMirrorImage(originalRoll.rSource, rSource, originalRoll.rRoll);
+		end
 		if hit then
 			if  Session.IsHost then
 				decrementMirrorImages(rSource, numMirrorImages);
@@ -65,7 +81,7 @@ end
 function decrementMirrorImages(rActor, currentNumImages)
 	local newNumImages = currentNumImages - 1;
 
-	EffectManager.removeEffect(ActorManager.getCTNode(rActor), "% *[Mm]irror% +[Ii]mage% *");
+	EffectManager.removeEffect(ActorManager.getCTNode(rActor), "% *[Mm][Ii][Rr][Rr][Oo][Rr]% +[Ii][Mm][Aa][Gg][Ee]% *");
 	if newNumImages > 0 then
 		EffectManager.addEffect("", "", ActorManager.getCTNode(rActor), getMirrorImageEffect(newNumImages), false);
 	end
@@ -375,14 +391,19 @@ function getNumMirrorImages(rActor)
 end
 
 function rollMirrorImageCheck(actor, originalRoll, numImages)
-	local rRoll = { sType = "mirrorImage", sDesc = "[MIRROR CHECK]", aDice = { "d20" }, nMod = 0, bTower = false, bSecret = false };
+	local rRoll;
+	if OptionsManager.isOption('GAVE', '2024') then
+		rRoll = { sType = "mirrorImage", sDesc = "[MIRROR CHECK]",  bTower = false, bSecret = false };
+		rRoll.aDice, rRoll.nMod = StringManager.convertStringToDice(tostring(numImages) .. "d6");
+	else
+		rRoll = { sType = "mirrorImage", sDesc = "[MIRROR CHECK]", aDice = { "d20" }, nMod = 0, bTower = false, bSecret = false };
+	end
 	rRoll.numMirrorImages = numImages;
 
 	-- Hacky way of passing the roll info to the mirrorImage handler
 	rRoll.originalRollId = nextFreeId;
 	originalRolls[tostring(nextFreeId)] = originalRoll;
 	nextFreeId = nextFreeId + 1;
-
 	ActionsManager.performAction(nil, actor, rRoll);
 end
 
