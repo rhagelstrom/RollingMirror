@@ -35,13 +35,18 @@ function onMirrorImageHit(rSource, rTarget, rRoll)
 	local numMirrorImages = math.min(rRoll.numMirrorImages, 20 - 1); -- max checked outside
 	local bMirrorImageHit = false;
 	if OptionsManager.isOption('GAVE', '2024') then
+
 		for _, nResult in ipairs(rRoll.aDice) do
 			if nResult.value >= 3 then
-				bMirrorImageHit = true;
 				applyAttackAtMirrorImage(originalRoll.rSource, rSource, originalRoll.rRoll.bTower, originalRoll.rRoll.sType,
-					originalRoll.rRoll.sDesc, ActionsManager.total(originalRoll.rRoll),'[HIT]');
+					originalRoll.rRoll.sDesc, ActionsManager.total(originalRoll.rRoll),"[HIT]");
+				bMirrorImageHit = true;
 				break;
 			end
+		end
+		if not bMirrorImageHit then
+			applyAttackAtMirrorImage(originalRoll.rSource, rSource, originalRoll.rRoll.bTower, originalRoll.rRoll.sType,
+			originalRoll.rRoll.sDesc, ActionsManager.total(originalRoll.rRoll),"[MISS]");
 		end
 	else
 		bMirrorImageHit = isMirrorImageHit(numMirrorImages, ActionsManager.total(rRoll));
@@ -58,7 +63,7 @@ function onMirrorImageHit(rSource, rTarget, rRoll)
 				notifyDecrementMirrorImages(rSource, numMirrorImages);
 			end
 		end
-	else
+	elseif not OptionsManager.isOption('GAVE', '2024')  then
 		superOnAttack(originalRoll.rSource, rSource, originalRoll.rRoll);
 	end
 end
@@ -298,8 +303,16 @@ function onAttack(rSource, rTarget, rRoll)
 			sendChatMessage(rSource, rTarget, "Attacker can see through the mirror image illusions");
 			superOnAttack(rSource, rTarget, rRoll);
 		else
-			local originalRoll = { rSource = rSource, rRoll = rRoll };
-			rollMirrorImageCheck(rTarget, originalRoll, numMirrorImages);
+			if OptionsManager.isOption('GAVE', '2024') then
+				superOnAttack(rSource, rTarget, rRoll);
+				if rRoll.sResults == '[HIT]' or  rRoll.sResults == '[CRITICAL HIT]' then
+					local originalRoll = { rSource = rSource, rRoll = rRoll };
+					rollMirrorImageCheck(rTarget, originalRoll, numMirrorImages);
+				end
+			else
+				local originalRoll = { rSource = rSource, rRoll = rRoll };
+				rollMirrorImageCheck(rTarget, originalRoll, numMirrorImages);
+			end
 		end
 	else
 		superOnAttack(rSource, rTarget, rRoll);
